@@ -22,7 +22,6 @@ class Tower:
             return True
         else:
             return False
-        #raise NotImplementedError()
 
     def size(self):
         """
@@ -30,8 +29,7 @@ class Tower:
 
         :return: The size (number of discs) of the tower.
         """
-        return int(len(self.discs))
-        #raise NotImplementedError()
+        return len(self.discs)
 
     def pop_disc(self):
         """
@@ -44,7 +42,6 @@ class Tower:
             return self.discs.pop()
         except IndexError:
             raise HanoiException("No puedes extraer un disco de una torre vacía!")
-        #raise NotImplementedError()
 
     '''
         Inserta un disco encima de la torre.
@@ -91,3 +88,33 @@ class Tower:
         """
         return str(self.as_list())
         #raise NotImplementedError()
+
+"""
+Tests
+"""
+#       TEST NUMBER 4
+
+#Something is really wrong if this test is not working
+tower = Tower()
+assert(tower.is_empty() == True)
+
+#       TEST NUMBER 5
+tower = Tower()
+tower.push_disc(2)
+assert(tower.pop_disc() == 2)
+assert(tower.is_empty() == True)
+
+#       TEST NUMBER 8
+tower = Tower()
+try:
+    tower.pop_disc()
+    assert(False)
+
+except HanoiException:
+    pass
+
+#       TEST NUMBER 9
+tower = Tower()
+tower.push_disc(3)
+assert(tower.pop_disc() == 3)
+

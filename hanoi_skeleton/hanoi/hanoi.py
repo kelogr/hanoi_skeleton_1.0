@@ -43,13 +43,11 @@ class HanoiGame:
         self.towers = [self.source, self.target, self.aux]
         
         #Inicializando los estados con los puntos iniciales
-        self.game_states.append(
-        State(0, 0, None, None, None, self.towers, self.get_n_discs()))
-        self.states.append(State(0, 0, None,
-        self.source, self.target, self.towers, self.get_n_discs()))
+        #self.game_states.append(State(0, 0, None, None, None, self.towers, self.get_n_discs()))
+        self.states.append(State(0, 0, None, self.source, self.target, self.towers, self.get_n_discs()))
         # 4.- Solve and store the optimal solution
         self._solve()
-
+        
     def get_state(self, step):
         """
         Returns the state at the requested step in the optimal solution.
@@ -84,7 +82,7 @@ class HanoiGame:
 
         :return: The number of states of the optimal solution.
         """
-        return int(len(self.states))
+        return len(self.states)
 
     def move(self, source, target, move_id=None, depth=None):
         """
@@ -101,23 +99,30 @@ class HanoiGame:
         try:
             if move_id is not None:
                 disk = source.pop_disc()
+                #disk = self.towers[source-1].pop_disc()
                 target.push_disc(disk)
-                self.states.append(State(move_id, depth, disk, source, target, self.towers, self.get_n_discs()))
+                #self.towers[target-1].push_disc(disk)
+                return State(move_id, depth, disk, source, target, self.towers, self.get_n_discs())
             else:
-                try:
-                    disk = source.pop_disc()
-                except AttributeError:
-                    HanoiException("No se ha podido extraer el disco por que esta vacío!!")
-                else:
-                    if target.is_empty() == True:
-                        target.push_disc(disk)
-                        self.game_states.append(State(len(self.game_states), None, disk, source, target, self.towers, self.get_n_discs()))
-                    elif target.discs[-1] < disk:
-                        source.push_disc(disk)
-                        raise HanoiException("El movimiento no es valido por que intentas colocar una ficha mayor que la inferior!!")
+                if source != target:
+                    try:
+                        #disk = source.pop_disc()
+                        disk = self.towers[source].pop_disc()
+                    except AttributeError:
+                        HanoiException("No se ha podido extraer el disco por que esta vacío!!")
                     else:
-                        target.discs.append(disk)
-                        self.game_states.append(State(len(self.game_states), None, disk, source, target, self.towers, self.get_n_discs()))
+                        if self.towers[target].is_empty() == True:
+                            #target.push_disc(disk)
+                            self.towers[target].push_disc(disk)
+                            #return self.game_states.append(State(len(self.game_states), None, disk, source, target, self.towers, self.get_n_discs()))
+                        elif self.towers[target].discs[-1] < disk:
+                            self.towers[source].push_disc(disk)
+                            raise HanoiException("El movimiento no es valido por que intentas colocar una ficha mayor que la inferior!!")
+                        else:
+                            self.towers[target].push_disc(disk)
+                            #return self.game_states.append(State(len(self.game_states), None, disk, source, target, self.towers, self.get_n_discs()))
+                else:
+                    raise HanoiException("Origen y destino son la misma torre!")
         except HanoiException as msg:
             print(msg)
 
@@ -141,8 +146,9 @@ class HanoiGame:
         """
         if n_discs >= 1:
             self._solve_rec(n_discs-1, source, aux, target, depth+1)
-            self.move(source, target, self.get_n_states(), depth)
-            self._solve_rec(n_discs-1, aux, target, source, depth)
+            state = self.move(source, target, self.get_n_states(), depth+1)
+            self.states.append(state)
+            self._solve_rec(n_discs-1, aux, target, source, depth+1)
 
     def print_optimal_state(self, step):
         """
@@ -150,8 +156,7 @@ class HanoiGame:
 
         :param step: Step index of the optimal solution.
         """
-        string = self.get_state(step)
-        print(string)
+        print(self.get_state(step))
 
     def print_optimal_solution(self):
         """
@@ -159,7 +164,6 @@ class HanoiGame:
         """
         for torre in self.states:
             print(torre)
-
 
     def is_finished(self):
         """
@@ -178,10 +182,8 @@ class HanoiGame:
 
         :return: The current state of the game.
         """
-        try:
-            return str(self.game_states[-1])
-        except IndexError:
-            raise HanoiException("Aún no has empezado el juego!!")
+        state = State(0, None, None, None, None, self.towers, self.n_discs)
+        return str(state)
 
     def __repr__(self):
         """

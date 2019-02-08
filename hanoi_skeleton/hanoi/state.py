@@ -35,14 +35,15 @@ class State:
         self.torres = []
         for tower in towers:
             self.torres.append(tower.as_list())
-            if self.source == tower:
-                self.num_source = count
-                count += 1
-            elif self.target == tower:
-                self.num_target = count
-                count += 1
-            else:
-                count += 1
+            if not isinstance(self.source, int):
+                if self.source == tower:
+                    self.num_source = count
+                    count += 1
+                elif self.target == tower:
+                    self.num_target = count
+                    count += 1
+                else:
+                    count += 1
         # How the towers will be stored? Directly? Is that a good idea?
         #raise NotImplementedError()
 
@@ -54,8 +55,10 @@ class State:
         :param idx: Index of the tower.
         :return: The tower corresponding to the idx.
         """
-        return self.torres[idx]
-        #raise NotImplementedError()
+        try:
+            return self.torres[idx]
+        except IndexError:
+            raise HanoiException("La torre no se encuentra en el juego!")
 
     def __repr__(self):
         """
@@ -65,7 +68,6 @@ class State:
         :return: A string with the internal representation of the state.
         """
         return str(self.torres)
-        #raise NotImplementedError()
 
     def __str__(self):
         """
@@ -76,22 +78,25 @@ class State:
         header = "Move id " + str(self.move_id) + " Rec Depth " + str(self.depth) + "\n"
         sub_header = "Last move: " + str(self.moved_disc) + " Disk, from " + str(self.num_source) + " to " + str(self.num_target) + "\n"
         rep_tow = ""
-        TOWER_EMPTY = ((self.NON_DISC_CHAR)*self.n_discs+self.ROD_CHAR + (self.NON_DISC_CHAR)*(self.n_discs))
+        TOWER_EMPTY = ((self.NON_DISC_CHAR)*self.n_discs + self.ROD_CHAR + (self.NON_DISC_CHAR)*(self.n_discs))
         for i in range(self.n_discs, -1, -1):
             for j in range(0, len(self.torres)):
                 if i != 0:
                     if len(self.torres[j]) < i:
                         if j == len(self.torres)-1:
-                            rep_tow = rep_tow + TOWER_EMPTY + "\n"
+                            rep_tow = rep_tow + TOWER_EMPTY + " \n"
                         else:
                             rep_tow = rep_tow + TOWER_EMPTY + " "
                     else:
                         TOWER_NOT_EMPTY = ((self.NON_DISC_CHAR)*(self.n_discs-self.torres[j][i-1])+self.DISC_CHAR*self.torres[j][i-1] +
                         self.ROD_CHAR+self.DISC_CHAR*self.torres[j][i-1]+(self.NON_DISC_CHAR)*(self.n_discs-self.torres[j][i-1]))
                         if j == len(self.torres)-1:
-                            rep_tow = rep_tow + TOWER_NOT_EMPTY + "\n"
+                            rep_tow = rep_tow + TOWER_NOT_EMPTY + " \n"
                         else:
                             rep_tow = rep_tow + TOWER_NOT_EMPTY + " "
                 else:
-                    rep_tow = rep_tow + "Torre " + str(j+1) + str(self.n_discs*" ")
-        return header + sub_header + rep_tow + "\n"
+                    rep_tow = rep_tow + " "*(self.n_discs-3) +"Tower " + str(j+1) + " "*((self.n_discs-3)+1)
+        if self.depth is not None:
+            return header + sub_header + rep_tow + " \n"
+        else:
+            return "\n" + rep_tow + "\n"

@@ -1,6 +1,5 @@
 from hanoi.hanoi import HanoiGame
 from hanoi.hanoi_exception import HanoiException
-from hanoi.tower import Tower
 
 
 def get_int_value(message, range_start, range_end):
@@ -46,7 +45,8 @@ def do_move(hanoi_game):
                 target_tower = get_int_value("Move to? (tower 1, 2 or 3, 0 to cancel)\n", 0, 3)
 
                 if target_tower:
-                    hanoi_game.move(hanoi_game.towers[source_tower-1], hanoi_game.towers[target_tower-1])
+                    #hanoi_game.move(hanoi_game.towers[source_tower-1], hanoi_game.towers[target_tower-1])
+                    hanoi_game.move(source_tower-1, target_tower-1)
                 else:
                     print("Move canceled!")
             else:
@@ -159,3 +159,52 @@ def show_menu():
 
 if __name__ == '__main__':
     show_menu()
+
+#       TEST NUMBER 6
+#Initial state plus 2^n - 1 states with moves
+hanoi_game = HanoiGame(10)
+assert(hanoi_game.get_n_states() == 1024)
+
+#       TEST NUMBER 7
+#You need to be able to retrieve the state of a tower in a state, to see the number of elements that are there
+hanoi_game = HanoiGame(3)
+state = hanoi_game.get_state(5)
+
+assert(sum(1 for element in state.get_tower(0) if element != 0) == 1)
+assert(sum(1 for element in state.get_tower(1) if element != 0) == 1)
+assert(sum(1 for element in state.get_tower(2) if element != 0) == 1)
+
+#       TEST NUMBER 10
+
+#Note that we are accessing the first state. No moves have been done yet, So no header or last move line needs to be present
+expected = """
+....#|#.... .....|..... .....|..... 
+...##|##... .....|..... .....|..... 
+..###|###.. .....|..... .....|..... 
+.####|####. .....|..... .....|..... 
+#####|##### .....|..... .....|..... 
+  Tower 1     Tower 2     Tower 3   
+"""
+
+hanoi_game = HanoiGame(5)
+state = hanoi_game.get_state(0)
+print(state)
+assert(expected == str(state))
+
+#       TEST NUMBER 12
+
+#Show the current state, when playing manually
+hanoi_game = HanoiGame(3)
+hanoi_game.move(0, 2)
+hanoi_game.move(0, 1)
+
+state = hanoi_game.get_current_state()
+
+expected = """
+...|... ...|... ...|... 
+...|... ...|... ...|... 
+###|### .##|##. ..#|#.. 
+Tower 1 Tower 2 Tower 3 
+"""
+print(state + " " + expected)
+assert(expected == str(state))
